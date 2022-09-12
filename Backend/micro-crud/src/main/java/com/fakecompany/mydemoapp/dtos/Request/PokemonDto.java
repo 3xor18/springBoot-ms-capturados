@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
@@ -15,7 +16,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class PokemonDto implements Serializable {
 
-    @NotNull(message = "Requerido")
+    @NotEmpty(message = "Requerido")
     //Es para decirle que nombre va a tener el valor de entrada/salida
     @JsonProperty(value = "nombre", index = 1)
     // nombre dentro de nuestra app

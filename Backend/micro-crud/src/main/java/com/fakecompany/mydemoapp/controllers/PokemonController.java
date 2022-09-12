@@ -6,10 +6,16 @@ import com.fakecompany.mydemoapp.exceptions.AppInternalServerErrorException;
 import com.fakecompany.mydemoapp.exceptions.AppNotFoundException;
 import com.fakecompany.mydemoapp.services.PokemonService;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 //Nos permite marcar la clase como un controlador rest
 @RestController
@@ -38,7 +44,10 @@ public class PokemonController {
     }
 
     @PostMapping
-    public ResponseEntity<?> guardar(@RequestBody PokemonDto dto) throws AppInternalServerErrorException {
+    public ResponseEntity<?> guardar(@Valid @RequestBody PokemonDto dto, BindingResult result) throws AppInternalServerErrorException {
+        if (result.hasErrors()) {
+           return hasError(result);
+        }
             return pokemonService.guardar(dto);
     }
 
@@ -50,6 +59,18 @@ public class PokemonController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> borrar(@PathVariable Long id) throws AppInternalServerErrorException, AppNotFoundException {
         return pokemonService.borrar(id);
+    }
+
+    private ResponseEntity<?> hasError(BindingResult result){
+        log.info("Ha Ocurrido un error en uno de los campos del Request");
+        Map<String, Object> response = new HashMap<>();
+        List<String> errors = result.getFieldErrors()
+                .stream()
+                .map(err -> "El campo '" + err.getField() + "' " + err.getDefaultMessage())
+                .collect(Collectors.toList());
+
+        response.put("errors", errors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
 }
